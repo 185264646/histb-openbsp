@@ -78,9 +78,9 @@ recover:
 clean:
 	-rm -rf out
 	-rm -rf $(ATF_PATH)/build
+	$(MAKE) -C$(ATF_PATH) clean
 	$(MAKE) -C$(L-LOADER_PATH) clean
 	$(MAKE) -C$(UBOOT_PATH) clean
-	$(MAKE) -C$(KERNEL_PATH) clean
 
 atf: u-boot
 	$(MAKE) $(ATF_FLAGS)
