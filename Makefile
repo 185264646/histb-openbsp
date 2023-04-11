@@ -45,11 +45,11 @@ ifeq ($(DEBUG), 1)
 endif
 ATF_FLAGS+=CROSS_COMPILE=$(CROSS_COMPILE)
 ifeq ($(DEBUG), 1)
-	BL1_PATH=out/atf/hi3798mv2x/debug/bl1.bin
-	FIP_PATH=out/atf/hi3798mv2x/debug/fip.bin
+	BL1_BIN=$(ATF_PATH)/build/hi3798mv2x/debug/bl1.bin
+	FIP_BIN=$(ATF_PATH)/build/hi3798mv2x/debug/fip.bin
 else
-	BL1_PATH=out/atf/hi3798mv2x/release/bl1.bin
-	FIP_PATH=out/atf/hi3798mv2x/release/fip.bin
+	BL1_BIN=$(ATF_PATH)/build/hi3798mv2x/release/bl1.bin
+	FIP_BIN=$(ATF_PATH)/build/hi3798mv2x/release/fip.bin
 endif
 ifeq ($(REC), 1)
 	ATF_FLAGS+=POPLAR_RECOVERY=1
@@ -67,21 +67,10 @@ else
 	L-LOADER_BIN?=$(L-LOADER_PATH)/l-loader.bin
 endif
 
-# Linux kernel vars
-KERNEL_PATH:=linux
-KERNEL_BASE_FLAGS:=-C$(KERNEL_PATH) CROSS_COMPILE=$(CROSS_COMPILE) ARCH=arm64
-KERNEL_CONF_FLAGS:=$(KERNEL_BASE_FLAGS) hi3798mv2x_defconfig
-ifeq ($(DEBUG), 1)
-	KERNEL_CONF_FLAGS+=hi3798mv2x_debug.config
-endif
-ifeq ($(DTB), 1)
-	DTB_FLAGS=dtbs
-endif
-KERNEL_BUILD_FLAGS:=$(KERNEL_BASE_FLAGS) $(DTB_FLAGS)
 # Targets
-.PHONY: all clean install u-boot atf l-loader linux recover
+.PHONY: all clean install u-boot atf l-loader recover
 
-all: l-loader linux
+all: l-loader
 
 recover:
 	python.exe scripts/serial_boot.py -t $(L-LOADER_BIN)
@@ -95,19 +84,12 @@ clean:
 
 atf: u-boot
 	$(MAKE) $(ATF_FLAGS)
-	mkdir -p out/atf
-	cp -rf $(ATF_PATH)/build/hi3798mv2x out/atf
 
 l-loader: atf
-	cp $(BL1_PATH) $(FIP_PATH) $(L-LOADER_PATH)/atf
+	install $(BL1_BIN) $(FIP_BIN) $(L-LOADER_PATH)/atf
+	# l-loader must be cleaned before recompiling
 	$(MAKE) $(L-LOADER_FLAGS) clean all
 
 u-boot:
 	$(MAKE) $(UBOOT_CONF_FLAGS)
 	$(MAKE) $(UBOOT_BUILD_FLAGS)
-
-linux:
-	$(MAKE) $(KERNEL_CONF_FLAGS)
-	$(MAKE) $(KERNEL_BUILD_FLAGS)
-	mkdir -p out/linux
-	install $(KERNEL_PATH)/arch/arm64/boot/Image.gz $(KERNEL_PATH)/arch/arm64/boot/dts/hisilicon/hi3798mv200-hc2910v7.dtb out/linux
