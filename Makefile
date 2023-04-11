@@ -14,7 +14,6 @@ PWD:=$(shell pwd)
 UBOOT_DIR=u-boot
 UBOOT_PATH=$(PWD)/$(UBOOT_DIR)
 UBOOT_DEFCONF:=hc2910_2aghd05_defconfig
-UBOOT_CONF_FILE:=$(PWD)/out/u-boot/.config
 UBOOT_BIN:=$(UBOOT_PATH)/u-boot.bin
 
 # U-Boot flags
