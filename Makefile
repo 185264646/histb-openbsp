@@ -93,3 +93,13 @@ l-loader: atf
 u-boot:
 	$(MAKE) $(UBOOT_CONF_FLAGS)
 	$(MAKE) $(UBOOT_BUILD_FLAGS)
+
+u-boot.uImage: u-boot
+	mkimage -A arm64 -O u-boot -T standalone -C none -a 0x800000 -e 0x800000 -d u-boot/u-boot.bin $@
+
+install: recovery_scripts/extlinux.conf u-boot.uImage l-loader recovery_scripts/boot.scr
+	install -D -t out/extlinux recovery_scripts/extlinux.conf
+	install -D -t out u-boot.uImage $(L-LOADER_BIN) recovery_scripts/boot.scr
+
+recovery_scripts/boot.scr: recovery_scripts/boot.cmd
+	mkimage -A arm -T script -C none -a 0x800000 -e 0x800000 -d $< $@
