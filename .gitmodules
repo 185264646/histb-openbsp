@@ -13,6 +13,3 @@
 	path = u-boot
 	url = ../u-boot.git
 	branch = wip/trunk
-[submodule "linux"]
-	path = linux
-	url = https://github.com/185264646/msm8916-linux.git
